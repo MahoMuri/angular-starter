@@ -1,1 +1,209 @@
-<p>dashboard works!</p>
+<p-toast></p-toast>
+
+<p-overlayPanel #op>
+    <ng-template pTemplate>
+        <div class="flex flex-col">
+            <label for="update-overlay">Enter User ID</label>
+            <input id="update-overlay" type="text" pInputText>
+        </div>
+    </ng-template>
+</p-overlayPanel>
+
+<p-toolbar>
+    <div class="p-toolbar-group-left">
+        <img src="../../assets/Titus-LOGO.png" class="w-32 pr-5 object-contain">
+        <div class="flex gap-3">
+            <button pButton (click)="displayInsertModal=true" label="Insert Page" icon="pi pi-plus"
+                class="p-button-success"></button>
+            <button pButton (click)="op.toggle($event)" label="Update Page" icon="pi pi-pencil"
+                class="p-button-warning"></button>
+        </div>
+    </div>
+    <div class="p-toolbar-group-right">
+        <button pButton (click)="logOut()" label="Logout" icon="pi pi-power-off" class="p-button-danger"></button>
+    </div>
+</p-toolbar>
+
+<!-- Data Table -->
+<div class="p-10">
+    <h1 class="font-semibold mb-10">Welcome, {{ loggedAdminUser | titlecase }}</h1>
+    <p-table [value]="users" styleClass="p-datatable-gridlines">
+        <ng-template pTemplate="header">
+            <tr>
+                <th></th>
+                <th>User ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Country</th>
+                <th>Nationality</th>
+                <th>Company</th>
+                <th>Designation</th>
+                <th>Work Exp</th>
+                <th>CV</th>
+                <th>Data Source</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-user>
+            <tr>
+                <td class="hover:bg-zinc-200" (click)="displayUpdateModal=true">
+                    <i class="pi pi-pencil"></i>
+                </td>
+                <td>{{ user.userId }}</td>
+                <td>{{ user.firstName }}</td>
+                <td>{{ user.lastName }}</td>
+                <td>{{ user.country }}</td>
+                <td>{{ user.nationality }}</td>
+                <td>{{ user.company }}</td>
+                <td>{{ user.designation }}</td>
+                <td>{{ user.workExp }}</td>
+                <td><a routerLink="/dashboard" class="text-blue-600 underline">View</a></td>
+                <td>{{ user.dataSource }}</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<!-- 
+    =====================================================================
+                                    Sidebars
+    =====================================================================
+ -->
+
+<!-- Insert Sidebar -->
+<p-sidebar [(visible)]="displayInsertModal" [baseZIndex]="10000">
+    <h3 class="font-semibold mb-5">Insert User</h3>
+    <form class="grid gap-3 pb-3" [formGroup]="insertFormGroup" novalidate>
+        <div>
+            <label for="firstNameInput" class="font-main font-bold block">First Name</label>
+            <input id="firstNameInput" type="text" aria-describedby="firstNameHelp" class="w-full p-inputtext-sm"
+                [ngClass]="{ 'ng-dirty ng-invalid': firstName.errors && (firstName.dirty || firstName.touched) }"
+                pInputText formControlName="firstName">
+            <small id="firstNameHelp" *ngIf="firstName.errors && (firstName.dirty || firstName.touched)"
+                class="p-error block">This field is required</small>
+        </div>
+        <div>
+            <label for="lastNameInput" class="font-main font-bold block">Last Name</label>
+            <input id="lastNameInput" type="text" aria-describedby="lastNameHelp" class="w-full p-inputtext-sm"
+                [ngClass]="{ 'ng-dirty ng-invalid': lastName.errors && (lastName.dirty || lastName.touched) }"
+                pInputText formControlName="lastName">
+            <small id="lastNameHelp" *ngIf="lastName.errors && (lastName.dirty || lastName.touched)"
+                class="p-error block">This field is required</small>
+        </div>
+        <div>
+            <label for="countryInput" class="font-main font-bold block">Country</label>
+            <input id="countryInput" type="text" aria-describedby="countryHelp" class="w-full p-inputtext-sm"
+                [ngClass]="{ 'ng-dirty ng-invalid': country.errors && (country.dirty || country.touched) }" pInputText
+                formControlName="country">
+            <small id="countryHelp" *ngIf="country.errors && (country.dirty || country.touched)"
+                class="p-error block">This field is required</small>
+        </div>
+        <div>
+            <label for="nationalityInput" class="font-main font-bold block">Nationality</label>
+            <input id="nationalityInput" type="text" aria-describedby="nationalityHelp" class="w-full p-inputtext-sm"
+                [ngClass]="{ 'ng-dirty ng-invalid': nationality.errors && (nationality.dirty || nationality.touched) }"
+                pInputText formControlName="nationality">
+            <small id="nationalityHelp" *ngIf="nationality.errors && (nationality.dirty || nationality.touched)"
+                class="p-error block">This field is required</small>
+        </div>
+        <div>
+            <label for="companyInput" class="font-main font-bold block">Company</label>
+            <input id="companyInput" type="text" aria-describedby="companyHelp" class="w-full p-inputtext-sm"
+                [ngClass]="{ 'ng-dirty ng-invalid': company.errors && (company.dirty || company.touched) }" pInputText
+                formControlName="company">
+            <small id="companyHelp" *ngIf="company.errors && (company.dirty || company.touched)"
+                class="p-error block">This field is required</small>
+        </div>
+        <div>
+            <label for="designationInput" class="font-main font-bold block">Designation</label>
+            <input id="designationInput" type="text" aria-describedby="designationHelp" class="w-full p-inputtext-sm"
+                [ngClass]="{ 'ng-dirty ng-invalid': designation.errors && (designation.dirty || designation.touched) }"
+                pInputText formControlName="designation">
+            <small id="designationHelp" *ngIf="designation.errors && (designation.dirty || designation.touched)"
+                class="p-error block">This field is required</small>
+        </div>
+        <div>
+            <label for="workExpInput" class="font-main font-bold block">Work Exp</label>
+            <p-inputNumber inputId="workExpInput" aria-describedby="workExpHelp" class="p-inputtext-sm"
+                [ngClass]="{ 'ng-dirty ng-invalid': workExp.errors && (workExp.dirty || workExp.touched) }"
+                formControlName="workExp">
+            </p-inputNumber>
+            <small id="workExpHelp" *ngIf="workExp.errors && (workExp.dirty || workExp.touched)"
+                class="p-error block">This field is must be greater than 0</small>
+        </div>
+        <div>
+            <label for="cvInput" class="font-main font-bold block">CV</label>
+            <p-fileUpload id="cvInput" mode="basic" class="w-full p-inputtext-sm" chooseLabel="Choose File">
+            </p-fileUpload>
+        </div>
+        <div>
+            <label for="dataSourceInput" class="font-main font-bold block">Data Source</label>
+            <p-dropdown [options]="dataSources" optionLabel="name" aria-describedby="dataSourceHelp"
+                formControlName="dataSource" class="w-full">
+            </p-dropdown>
+        </div>
+    </form>
+    <ng-template pTemplate="footer">
+        <div class="flex gap-3 mt-1 justify-around">
+            <p-button icon="pi pi-check" (click)="addUser()" label="Insert">
+            </p-button>
+            <p-button icon="pi pi-times" (click)="resetForm()" label="Clear" styleClass="p-button-danger">
+            </p-button>
+        </div>
+    </ng-template>
+</p-sidebar>
+
+<!-- Update Sidebar -->
+<p-sidebar [(visible)]="displayUpdateModal" [baseZIndex]="10000">
+    <h3 class="font-semibold mb-5">Update User</h3>
+    <form class="grid gap-3 pb-3" [formGroup]="updateFormGroup" novalidate>
+        <div>
+            <label for="firstNameInput" class="font-main font-bold block">First Name</label>
+            <input id="firstNameInput" type="text" class="w-full p-inputtext-sm" pInputText formControlName="firstName">
+        </div>
+        <div>
+            <label for="lastNameInput" class="font-main font-bold block">Last Name</label>
+            <input id="lastNameInput" type="text" class="w-full p-inputtext-sm" pInputText formControlName="lastName">
+        </div>
+        <div>
+            <label for="countryInput" class="font-main font-bold block">Country</label>
+            <input id="countryInput" type="text" class="w-full p-inputtext-sm" pInputText formControlName="country">
+        </div>
+        <div>
+            <label for="nationalityInput" class="font-main font-bold block">Nationality</label>
+            <input id="nationalityInput" type="text" class="w-full p-inputtext-sm" pInputText
+                formControlName="nationality">
+        </div>
+        <div>
+            <label for="companyInput" class="font-main font-bold block">Company</label>
+            <input id="companyInput" type="text" class="w-full p-inputtext-sm" pInputText formControlName="company">
+        </div>
+        <div>
+            <label for="designationInput" class="font-main font-bold block">Designation</label>
+            <input id="designationInput" type="text" class="w-full p-inputtext-sm" pInputText
+                formControlName="designation">
+        </div>
+        <div>
+            <label for="workExpInput" class="font-main font-bold block">Work Exp</label>
+            <p-inputNumber inputId="workExpInput" class="p-inputtext-sm" formControlName="workExp">
+            </p-inputNumber>
+        </div>
+        <div>
+            <label for="cvInput" class="font-main font-bold block">CV</label>
+            <p-fileUpload id="cvInput" mode="basic" class="w-full p-inputtext-sm" chooseLabel="Choose File">
+            </p-fileUpload>
+        </div>
+        <div>
+            <label for="dataSourceInput" class="font-main font-bold block">Data Source</label>
+            <p-dropdown [options]="dataSources" optionLabel="name" formControlName="dataSource" class="w-full">
+            </p-dropdown>
+        </div>
+    </form>
+    <ng-template pTemplate="footer">
+        <div class="flex gap-3 mt-1 justify-around">
+            <p-button icon="pi pi-check" (click)="addUser()" label="Insert">
+            </p-button>
+            <p-button icon="pi pi-times" (click)="resetForm()" label="Clear" styleClass="p-button-danger">
+            </p-button>
+        </div>
+    </ng-template>
+</p-sidebar>
