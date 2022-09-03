@@ -1,0 +1,24 @@
+<div class="card">
+    <h1 class="font-header font-bold mb-7">Login</h1>
+    <h6 *ngIf="errorMessage" class="text-red-600 mb-6">{{ errorMessage }}</h6>
+    <div class="grid">
+        <span class="p-float-label">
+            <input class="w-full" id="float-input" [(ngModel)]="username" (click)="errorMessage = ''" type="text"
+                [ngClass]="{
+                'ng-invalid ng-dirty': errorMessage
+            }" pInputText>
+            <label for="float-input">Username</label>
+        </span>
+        <div class="mt-6 mb-3">
+            <span class="p-float-label">
+                <p-password id="float-pass" [(ngModel)]="password" (click)="errorMessage = ''" [ngClass]="{
+                    'ng-invalid ng-dirty': errorMessage
+                }" [toggleMask]="true" [feedback]="false"></p-password>
+                <label for="float-pass">Password</label>
+            </span>
+        </div>
+        <div class="mr-auto">
+            <p-button label="Login" (onClick)="logIn()"></p-button>
+        </div>
+    </div>
+</div>

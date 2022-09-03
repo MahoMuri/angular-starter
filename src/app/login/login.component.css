@@ -1,0 +1,4 @@
+.card {
+  @apply container mx-auto my-20 flex flex-col gap-2 items-center;
+  @apply bg-zinc-100 max-w-sm py-10 rounded-lg shadow-zinc-400 shadow-lg;
+}
