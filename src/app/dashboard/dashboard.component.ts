@@ -1,10 +1,22 @@
-import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { MessageService } from 'primeng/api';
+import { OverlayPanel } from 'primeng/overlaypanel';
 import { Generator } from 'snowflake-generator';
-import { User } from 'src/interfaces/User';
+import { DataSource, User } from 'src/interfaces/User';
 import { UserService } from '../user.service';
 
 @Component({
@@ -16,10 +28,10 @@ import { UserService } from '../user.service';
 export class DashboardComponent implements OnInit {
   displayInsertModal!: boolean;
   displayUpdateModal!: boolean;
-  insertFormGroup!: FormGroup;
-  updateFormGroup!: FormGroup;
   users!: User[];
   user!: User;
+  id!: string;
+  userFound!: boolean;
   dataSources = [
     { name: 'Facebook' },
     { name: 'Google' },
@@ -27,9 +39,11 @@ export class DashboardComponent implements OnInit {
     { name: 'JobsDB' },
     { name: 'Twitter' },
   ];
+  dataSource!: DataSource;
   loggedAdminUser!: string;
 
-  // FormControl Variables
+  // Form related Variables
+  insertFormGroup!: FormGroup;
   firstName!: FormControl;
   lastName!: FormControl;
   country!: FormControl;
@@ -37,7 +51,6 @@ export class DashboardComponent implements OnInit {
   company!: FormControl;
   designation!: FormControl;
   workExp!: FormControl;
-  dataSource!: FormControl;
 
   constructor(
     private router: Router,
@@ -52,8 +65,10 @@ export class DashboardComponent implements OnInit {
       return;
     }
     this.createValidators();
-    this.createFormGroups();
+    this.createFormGroup();
     this.getUsers();
+
+    // this.firstName.valueChanges.subscribe((val) => console.log(val));
 
     this.loggedAdminUser = this.cookieService.get('loggedAdminUser');
   }
@@ -61,27 +76,100 @@ export class DashboardComponent implements OnInit {
   getUsers() {
     this.userService.getUsers().subscribe((users) => {
       this.users = users;
-      console.log(this.users);
     });
   }
 
   addUser() {
+    const invalidControls = this.hasInvalidControls();
+    if (invalidControls.length) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Some fields are required!',
+      });
+      invalidControls.forEach((control) => {
+        control.markAsDirty();
+      });
+      return;
+    }
+
     this.displayInsertModal = false;
     this.messageService.add({
       severity: 'success',
       summary: 'Success',
       detail: 'User Added!',
     });
+    this.user = {
+      id: new Generator().generate().toString(),
+      firstName: this.insertFormGroup.get('firstName')?.value,
+      lastName: this.insertFormGroup.get('lastName')?.value,
+      country: this.insertFormGroup.get('country')?.value,
+      nationality: this.insertFormGroup.get('nationality')?.value,
+      company: this.insertFormGroup.get('company')?.value,
+      designation: this.insertFormGroup.get('designation')?.value,
+      workExp: this.insertFormGroup.get('workExp')?.value,
+      cv: '',
+      dataSource: this.dataSource,
+    };
+
+    this.userService.addUser(this.user).subscribe((user) => {
+      this.users.push(user);
+    });
+
     this.resetForm();
-    // TODO: Make add function in dashboard
   }
 
-  deleteUser() {
-    // TODO: Make delete function in dashboard
+  deleteUser(user: User) {
+    this.users = this.users.filter((u) => u !== user);
+    this.userService.deleteUser(user.id).subscribe(() => {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'User Deleted!',
+      });
+    });
   }
 
   updateUser() {
-    // TODO: Make update function in dashboard
+    if (this.user) {
+      this.userService.updateUser(this.user).subscribe(() => {
+        const index = this.users.findIndex((u) => u.id === this.user.id);
+        this.users[index] = this.user;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'User Updated!',
+        });
+      });
+      this.displayUpdateModal = false;
+    }
+  }
+
+  searchUser(id: string) {
+    if (!id) {
+      this.userFound = false;
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'User ID cannot be blank!',
+      });
+      return;
+    }
+
+    this.userService.getUser(id).subscribe((res) => {
+      if (!res || res.id !== id) {
+        this.userFound = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'User not found!',
+        });
+        return;
+      }
+      this.userFound = true;
+      this.displayUpdateModal = true;
+      this.user = res;
+    });
   }
 
   logOut() {
@@ -97,31 +185,7 @@ export class DashboardComponent implements OnInit {
   //                    Private Functions
   // =======================================================
 
-  createFormGroups() {
-    this.insertFormGroup = new FormGroup({
-      firstName: this.firstName,
-      lastName: this.lastName,
-      country: this.country,
-      nationality: this.nationality,
-      company: this.company,
-      designation: this.designation,
-      workExp: this.workExp,
-      dataSource: this.dataSource,
-    });
-
-    this.updateFormGroup = new FormGroup({
-      firstName: this.firstName,
-      lastName: this.lastName,
-      country: this.country,
-      nationality: this.nationality,
-      company: this.company,
-      designation: this.designation,
-      workExp: this.workExp,
-      dataSource: this.dataSource,
-    });
-  }
-
-  createValidators() {
+  private createValidators() {
     this.firstName = new FormControl('', Validators.required);
     this.lastName = new FormControl('', Validators.required);
     this.country = new FormControl('', Validators.required);
@@ -132,6 +196,29 @@ export class DashboardComponent implements OnInit {
       Validators.required,
       Validators.min(1),
     ]);
-    this.dataSource = new FormControl('', Validators.required);
+  }
+
+  private createFormGroup() {
+    this.insertFormGroup = new FormGroup({
+      firstName: this.firstName,
+      lastName: this.lastName,
+      country: this.country,
+      nationality: this.nationality,
+      company: this.company,
+      designation: this.designation,
+      workExp: this.workExp,
+    });
+  }
+
+  private hasInvalidControls() {
+    const invalidControls: AbstractControl[] = [];
+    const formControls = this.insertFormGroup.controls;
+    for (const name in formControls) {
+      if (formControls[name].invalid) {
+        invalidControls.push(formControls[name]);
+      }
+    }
+
+    return invalidControls;
   }
 }

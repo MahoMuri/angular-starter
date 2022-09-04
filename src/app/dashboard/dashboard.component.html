@@ -1,14 +1,20 @@
 <p-toast></p-toast>
 
+<!-- Overlay Panel -->
 <p-overlayPanel #op>
     <ng-template pTemplate>
-        <div class="flex flex-col">
-            <label for="update-overlay">Enter User ID</label>
-            <input id="update-overlay" type="text" pInputText>
+        <div class="flex flex-col gap-3">
+            <label for="update-overlay" class="font-header font-bold">Enter User ID</label>
+            <input id="update-overlay" type="text" [(ngModel)]="id" [ngClass]="{
+                'ng-invalid ng-dirty': !userFound
+            }" pInputText>
+            <p-button styleClass="p-button-warning" (onClick)="searchUser(id)" label="Update" icon="pi pi-pencil">
+            </p-button>
         </div>
     </ng-template>
 </p-overlayPanel>
 
+<!-- Toolbar -->
 <p-toolbar>
     <div class="p-toolbar-group-left">
         <img src="../../assets/Titus-LOGO.png" class="w-32 pr-5 object-contain">
@@ -41,14 +47,15 @@
                 <th>Work Exp</th>
                 <th>CV</th>
                 <th>Data Source</th>
+                <th></th>
             </tr>
         </ng-template>
         <ng-template pTemplate="body" let-user>
             <tr>
-                <td class="hover:bg-zinc-200" (click)="displayUpdateModal=true">
+                <td class="hover:bg-zinc-200" (click)="searchUser(user.id)">
                     <i class="pi pi-pencil"></i>
                 </td>
-                <td>{{ user.userId }}</td>
+                <td>{{ user.id }}</td>
                 <td>{{ user.firstName }}</td>
                 <td>{{ user.lastName }}</td>
                 <td>{{ user.country }}</td>
@@ -58,6 +65,9 @@
                 <td>{{ user.workExp }}</td>
                 <td><a routerLink="/dashboard" class="text-blue-600 underline">View</a></td>
                 <td>{{ user.dataSource }}</td>
+                <td class="hover:bg-zinc-200" (click)="deleteUser(user)">
+                    <i class="pi pi-trash"></i>
+                </td>
             </tr>
         </ng-template>
     </p-table>
@@ -137,8 +147,8 @@
         </div>
         <div>
             <label for="dataSourceInput" class="font-main font-bold block">Data Source</label>
-            <p-dropdown [options]="dataSources" optionLabel="name" aria-describedby="dataSourceHelp"
-                formControlName="dataSource" class="w-full">
+            <p-dropdown [options]="dataSources" optionLabel="name" optionValue="name" aria-describedby="dataSourceHelp"
+                [(ngModel)]="dataSource" [ngModelOptions]="{ standalone: true }" class="w-full">
             </p-dropdown>
         </div>
     </form>
@@ -153,38 +163,39 @@
 </p-sidebar>
 
 <!-- Update Sidebar -->
-<p-sidebar [(visible)]="displayUpdateModal" [baseZIndex]="10000">
+<p-sidebar [(visible)]="displayUpdateModal" [baseZIndex]="10000" *ngIf="user">
     <h3 class="font-semibold mb-5">Update User</h3>
-    <form class="grid gap-3 pb-3" [formGroup]="updateFormGroup" novalidate>
+    <div class="grid gap-3 pb-3">
         <div>
             <label for="firstNameInput" class="font-main font-bold block">First Name</label>
-            <input id="firstNameInput" type="text" class="w-full p-inputtext-sm" pInputText formControlName="firstName">
+            <input id="firstNameInput" type="text" class="w-full p-inputtext-sm" [(ngModel)]="user.firstName"
+                pInputText>
         </div>
         <div>
             <label for="lastNameInput" class="font-main font-bold block">Last Name</label>
-            <input id="lastNameInput" type="text" class="w-full p-inputtext-sm" pInputText formControlName="lastName">
+            <input id="lastNameInput" type="text" class="w-full p-inputtext-sm" [(ngModel)]="user.lastName" pInputText>
         </div>
         <div>
             <label for="countryInput" class="font-main font-bold block">Country</label>
-            <input id="countryInput" type="text" class="w-full p-inputtext-sm" pInputText formControlName="country">
+            <input id="countryInput" type="text" class="w-full p-inputtext-sm" pInputText [(ngModel)]="user.country">
         </div>
         <div>
             <label for="nationalityInput" class="font-main font-bold block">Nationality</label>
             <input id="nationalityInput" type="text" class="w-full p-inputtext-sm" pInputText
-                formControlName="nationality">
+                [(ngModel)]="user.nationality">
         </div>
         <div>
             <label for="companyInput" class="font-main font-bold block">Company</label>
-            <input id="companyInput" type="text" class="w-full p-inputtext-sm" pInputText formControlName="company">
+            <input id="companyInput" type="text" class="w-full p-inputtext-sm" pInputText [(ngModel)]="user.company">
         </div>
         <div>
             <label for="designationInput" class="font-main font-bold block">Designation</label>
             <input id="designationInput" type="text" class="w-full p-inputtext-sm" pInputText
-                formControlName="designation">
+                [(ngModel)]="user.designation">
         </div>
         <div>
             <label for="workExpInput" class="font-main font-bold block">Work Exp</label>
-            <p-inputNumber inputId="workExpInput" class="p-inputtext-sm" formControlName="workExp">
+            <p-inputNumber inputId="workExpInput" class="p-inputtext-sm" [(ngModel)]="user.workExp">
             </p-inputNumber>
         </div>
         <div>
@@ -194,15 +205,14 @@
         </div>
         <div>
             <label for="dataSourceInput" class="font-main font-bold block">Data Source</label>
-            <p-dropdown [options]="dataSources" optionLabel="name" formControlName="dataSource" class="w-full">
+            <p-dropdown [options]="dataSources" optionLabel="name" optionValue="name" [(ngModel)]="user.dataSource"
+                class="w-full">
             </p-dropdown>
         </div>
-    </form>
+    </div>
     <ng-template pTemplate="footer">
         <div class="flex gap-3 mt-1 justify-around">
-            <p-button icon="pi pi-check" (click)="addUser()" label="Insert">
-            </p-button>
-            <p-button icon="pi pi-times" (click)="resetForm()" label="Clear" styleClass="p-button-danger">
+            <p-button icon="pi pi-check" (click)="updateUser()" label="Update">
             </p-button>
         </div>
     </ng-template>
