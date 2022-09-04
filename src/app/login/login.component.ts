@@ -16,7 +16,7 @@ export class LoginComponent {
 
   logIn() {
     if (this.username === 'mahomuri' && this.password === 'password123') {
-      this.cookieService.set('loggedAdminUser', this.username);
+      this.cookieService.set('loggedAdminUser', this.username, 1);
       this.router.navigateByUrl('/dashboard');
       console.log('Logged in!');
     } else {
