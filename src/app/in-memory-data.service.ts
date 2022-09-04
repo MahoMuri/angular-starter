@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Generator } from 'snowflake-generator';
 import { User } from 'src/interfaces/User';
 
 @Injectable({
@@ -10,7 +11,7 @@ export class InMemoryDataService implements InMemoryDataService {
   createDb() {
     const users: User[] = [
       {
-        userId: '6001350729913074688',
+        id: '6001350729913074688',
         firstName: 'Brenden',
         lastName: 'Wagner',
         country: 'United States of America, California',
@@ -22,7 +23,7 @@ export class InMemoryDataService implements InMemoryDataService {
         dataSource: 'Facebook',
       },
       {
-        userId: '6001350876722103296',
+        id: '6001350876722103296',
         firstName: 'Cara',
         lastName: 'Stevens',
         country: 'United States of America, New york',
@@ -34,7 +35,7 @@ export class InMemoryDataService implements InMemoryDataService {
         dataSource: 'Google',
       },
       {
-        userId: '6001350879951717376',
+        id: '6001350879951717376',
         firstName: 'Cedric',
         lastName: 'Kelly',
         country: 'Scotland, Glasgow City',
@@ -46,7 +47,7 @@ export class InMemoryDataService implements InMemoryDataService {
         dataSource: 'Monster Gulf',
       },
       {
-        userId: '6001350883055502336',
+        id: '6001350883055502336',
         firstName: 'Doris',
         lastName: 'Wilder',
         country: 'Australia, Queensland',
@@ -58,7 +59,7 @@ export class InMemoryDataService implements InMemoryDataService {
         dataSource: 'JobsDB',
       },
       {
-        userId: '6001350885806965760',
+        id: '6001350885806965760',
         firstName: 'Jenny',
         lastName: 'Chang',
         country: 'Singapore, Singapore',
@@ -71,5 +72,11 @@ export class InMemoryDataService implements InMemoryDataService {
       },
     ];
     return { users };
+  }
+
+  genId(users: User[]): string {
+    return users.length > 0
+      ? new Generator().generate().toString()
+      : users.map((u) => u.id)[0];
   }
 }

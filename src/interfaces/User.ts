@@ -6,7 +6,7 @@ export type DataSource =
   | 'Twitter';
 
 export interface User {
-  userId: string;
+  id: string;
   firstName: string;
   lastName: string;
   country: string;
