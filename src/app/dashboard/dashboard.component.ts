@@ -28,8 +28,10 @@ import { UserService } from '../user.service';
 export class DashboardComponent implements OnInit {
   displayInsertModal!: boolean;
   displayUpdateModal!: boolean;
+  displayCVModal!: boolean;
   users!: User[];
   user!: User;
+  fullName!: string;
   id!: string;
   userFound!: boolean;
   dataSources = [
@@ -176,6 +178,11 @@ export class DashboardComponent implements OnInit {
     if (isOp) {
       this.overlayPanel.hide();
     }
+  }
+
+  openCVModal(user: User) {
+    this.fullName = `${user.firstName} ${user.lastName}`;
+    this.displayCVModal = true;
   }
 
   logOut() {

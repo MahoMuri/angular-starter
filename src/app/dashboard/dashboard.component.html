@@ -14,6 +14,16 @@
     </ng-template>
 </p-overlayPanel>
 
+<!-- CV Modal -->
+<p-dialog header="{{ fullName }}" [(visible)]="displayCVModal" [modal]="true" [style]="{width: '50vw'}"
+    [draggable]="false" [resizable]="false">
+    <img src="../../assets/Resume-Paolo-v2.png" alt="Resume">
+    <ng-template pTemplate="footer">
+        <p-button icon="pi pi-check" (click)="displayCVModal=false" label="Ok" styleClass="p-button-text"></p-button>
+    </ng-template>
+</p-dialog>
+
+
 <!-- Toolbar -->
 <p-toolbar>
     <div class="p-toolbar-group-left">
@@ -63,7 +73,10 @@
                 <td>{{ user.company }}</td>
                 <td>{{ user.designation }}</td>
                 <td>{{ user.workExp }}</td>
-                <td><a routerLink="/dashboard" class="text-blue-600 underline">View</a></td>
+                <td>
+                    <p class="text-blue-600 cursor-pointer hover:underline hover:text-blue-900"
+                        (click)="openCVModal(user)">View</p>
+                </td>
                 <td>{{ user.dataSource }}</td>
                 <td class="hover:bg-zinc-200" (click)="deleteUser(user)">
                     <i class="pi pi-trash"></i>

@@ -24,6 +24,7 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { DropdownModule } from 'primeng/dropdown';
 import { ToastModule } from 'primeng/toast';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { DialogModule } from 'primeng/dialog';
 
 @NgModule({
   declarations: [
@@ -38,6 +39,7 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
     BrowserAnimationsModule,
     ButtonModule,
     DropdownModule,
+    DialogModule,
     HttpClientModule,
     HttpClientInMemoryWebApiModule.forRoot(InMemoryDataService, {
       dataEncapsulation: false,
