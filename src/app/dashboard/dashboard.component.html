@@ -8,7 +8,7 @@
             <input id="update-overlay" type="text" [(ngModel)]="id" [ngClass]="{
                 'ng-invalid ng-dirty': !userFound
             }" pInputText>
-            <p-button styleClass="p-button-warning" (onClick)="searchUser(id)" label="Update" icon="pi pi-pencil">
+            <p-button styleClass="p-button-warning" (onClick)="searchUser(id, true)" label="Update" icon="pi pi-pencil">
             </p-button>
         </div>
     </ng-template>

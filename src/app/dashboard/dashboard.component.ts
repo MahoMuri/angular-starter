@@ -51,6 +51,7 @@ export class DashboardComponent implements OnInit {
   company!: FormControl;
   designation!: FormControl;
   workExp!: FormControl;
+  @ViewChild('op') overlayPanel!: OverlayPanel;
 
   constructor(
     private router: Router,
@@ -145,7 +146,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  searchUser(id: string) {
+  searchUser(id: string, isOp = false) {
     if (!id) {
       this.userFound = false;
       this.messageService.add({
@@ -166,10 +167,15 @@ export class DashboardComponent implements OnInit {
         });
         return;
       }
+
       this.userFound = true;
       this.displayUpdateModal = true;
       this.user = res;
     });
+
+    if (isOp) {
+      this.overlayPanel.hide();
+    }
   }
 
   logOut() {
