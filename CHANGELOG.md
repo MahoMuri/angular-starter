@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/MahoMuri/angular-starter/compare/v1.0.1...v1.1.0) (2022-09-04)
+
+
+### Features
+
+* Added placeholder modal for CV ([f4f189a](https://github.com/MahoMuri/angular-starter/commit/f4f189a10a0ae23d52524d58c99096e2d4bbb9fc))
+
+
+### Bug Fixes
+
+* Added simple 404 response ([fe9ee87](https://github.com/MahoMuri/angular-starter/commit/fe9ee87146b7249b8c1ea77553184e42d832840e))
+
 ### [1.0.1](https://github.com/MahoMuri/angular-starter/compare/v1.0.0...v1.0.1) (2022-09-04)
 
 
