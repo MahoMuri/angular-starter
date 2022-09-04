@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.2](https://github.com/MahoMuri/angular-starter/compare/v1.0.1...v1.0.2) (2022-09-04)
+
+
+### Bug Fixes
+
+* Fixed userID no resetting after submission [#3](https://github.com/MahoMuri/angular-starter/issues/3) ([bcfa24a](https://github.com/MahoMuri/angular-starter/commit/bcfa24a4385e23c1103a1527345a976983a42f53))
+
 ### [1.0.1](https://github.com/MahoMuri/angular-starter/compare/v1.0.0...v1.0.1) (2022-09-04)
 
 
