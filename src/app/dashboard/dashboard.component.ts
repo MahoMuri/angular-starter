@@ -175,6 +175,7 @@ export class DashboardComponent implements OnInit {
 
     if (isOp) {
       this.overlayPanel.hide();
+      this.id = '';
     }
   }
 
