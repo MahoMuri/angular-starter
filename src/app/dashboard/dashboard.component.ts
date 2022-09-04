@@ -71,8 +71,6 @@ export class DashboardComponent implements OnInit {
     this.createFormGroup();
     this.getUsers();
 
-    // this.firstName.valueChanges.subscribe((val) => console.log(val));
-
     this.loggedAdminUser = this.cookieService.get('loggedAdminUser');
   }
 
