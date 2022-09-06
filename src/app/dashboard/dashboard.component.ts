@@ -67,11 +67,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // move to angular router guards (CanActivate)
-    if (!this.cookieService.check('loggedAdminUser')) {
-      this.router.navigateByUrl('/login');
-      return;
-    }
     this.createValidators();
     this.createFormGroup();
     this.getUsers();
