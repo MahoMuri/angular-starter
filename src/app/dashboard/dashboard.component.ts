@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
@@ -11,10 +12,12 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
+import _ from 'lodash';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { MessageService } from 'primeng/api';
 import { OverlayPanel } from 'primeng/overlaypanel';
+import { Subscription } from 'rxjs';
 import { Generator } from 'snowflake-generator';
 import { DataSource, User } from 'src/interfaces/User';
 import { UserService } from '../user.service';
@@ -25,7 +28,7 @@ import { UserService } from '../user.service';
   styleUrls: ['./dashboard.component.css'],
   providers: [MessageService],
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   displayInsertModal!: boolean;
   displayUpdateModal!: boolean;
   displayCVModal!: boolean;
@@ -43,6 +46,7 @@ export class DashboardComponent implements OnInit {
   ];
   dataSource!: DataSource;
   loggedAdminUser!: string;
+  subscriptions = new Subscription();
 
   // Form related Variables
   insertFormGroup!: FormGroup;
@@ -63,6 +67,7 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // move to angular router guards (CanActivate)
     if (!this.cookieService.check('loggedAdminUser')) {
       this.router.navigateByUrl('/login');
       return;
@@ -71,13 +76,21 @@ export class DashboardComponent implements OnInit {
     this.createFormGroup();
     this.getUsers();
 
-    this.loggedAdminUser = this.cookieService.get('loggedAdminUser');
+    this.loggedAdminUser = _.startCase(
+      this.cookieService.get('loggedAdminUser')
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   getUsers() {
-    this.userService.getUsers().subscribe((users) => {
-      this.users = users;
-    });
+    this.subscriptions.add(
+      this.userService.getUsers().subscribe((users) => {
+        this.users = users;
+      })
+    );
   }
 
   addUser() {
@@ -100,8 +113,16 @@ export class DashboardComponent implements OnInit {
       summary: 'Success',
       detail: 'User Added!',
     });
+
+    const test: string = this.insertFormGroup.get('lastName')?.value[0];
+    test.toLowerCase();
+
     this.user = {
       id: new Generator().generate().toString(),
+      username: `${_.camelCase(
+        `${this.firstName.value}${this.lastName.value}`
+      )}`,
+      password: 'password123',
       firstName: this.insertFormGroup.get('firstName')?.value,
       lastName: this.insertFormGroup.get('lastName')?.value,
       country: this.insertFormGroup.get('country')?.value,
@@ -113,35 +134,43 @@ export class DashboardComponent implements OnInit {
       dataSource: this.dataSource,
     };
 
-    this.userService.addUser(this.user).subscribe((user) => {
-      this.users.push(user);
-    });
+    console.log(this.user);
+
+    this.subscriptions.add(
+      this.userService.addUser(this.user).subscribe((user) => {
+        this.users.push(user);
+      })
+    );
 
     this.resetForm();
   }
 
   deleteUser(user: User) {
-    this.users = this.users.filter((u) => u !== user);
-    this.userService.deleteUser(user.id).subscribe(() => {
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'User Deleted!',
-      });
-    });
+    _.remove(this.users, (u) => u === user);
+    this.subscriptions.add(
+      this.userService.deleteUser(user.id).subscribe(() => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'User Deleted!',
+        });
+      })
+    );
   }
 
   updateUser() {
     if (this.user) {
-      this.userService.updateUser(this.user).subscribe(() => {
-        const index = this.users.findIndex((u) => u.id === this.user.id);
-        this.users[index] = this.user;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'User Updated!',
-        });
-      });
+      this.subscriptions.add(
+        this.userService.updateUser(this.user).subscribe(() => {
+          this.users[this.users.findIndex((u) => u.id === this.user.id)] =
+            this.user;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'User Updated!',
+          });
+        })
+      );
       this.displayUpdateModal = false;
     }
   }
@@ -157,21 +186,23 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.userService.getUser(id).subscribe((res) => {
-      if (!res || res.id !== id) {
-        this.userFound = false;
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'User not found!',
-        });
-        return;
-      }
+    this.subscriptions.add(
+      this.userService.getUser(id).subscribe((res) => {
+        if (!res || res.id !== id) {
+          this.userFound = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'User not found!',
+          });
+          return;
+        }
 
-      this.userFound = true;
-      this.displayUpdateModal = true;
-      this.user = res;
-    });
+        this.userFound = true;
+        this.displayUpdateModal = true;
+        this.user = res;
+      })
+    );
 
     if (isOp) {
       this.overlayPanel.hide();
