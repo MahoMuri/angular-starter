@@ -3,10 +3,13 @@ export type DataSource =
   | 'Google'
   | 'Monster Gulf'
   | 'JobsDB'
-  | 'Twitter';
+  | 'Twitter'
+  | string;
 
 export interface User {
   id: string;
+  username: string;
+  password: string;
   firstName: string;
   lastName: string;
   country: string;
