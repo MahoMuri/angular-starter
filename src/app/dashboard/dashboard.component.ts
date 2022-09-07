@@ -129,8 +129,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       dataSource: this.dataSource,
     };
 
-    console.log(this.user);
-
     this.subscriptions.add(
       this.userService.addUser(this.user).subscribe((user) => {
         this.users.push(user);

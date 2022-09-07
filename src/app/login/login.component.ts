@@ -40,7 +40,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     if (user) {
       this.cookieService.set('loggedAdminUser', this.username, 1);
       this.router.navigateByUrl('/dashboard');
-      console.log('Logged in!');
     } else {
       this.errorMessage = 'Incorrect username or password!';
     }
