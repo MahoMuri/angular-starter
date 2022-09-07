@@ -140,15 +140,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.resetForm();
   }
 
-  deleteUser(user: User) {
-    _.remove(this.users, (u) => u === user);
+  deleteUser(user: User, dashboard = this) {
     this.subscriptions.add(
-      this.userService.deleteUser(user.id).subscribe(() => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'User Deleted!',
-        });
+      this.userService.deleteUser(user.id).subscribe({
+        next() {
+          dashboard.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'User Deleted!',
+          });
+        },
+        error(err) {
+          dashboard.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to delete!',
+          });
+          console.error(err);
+        },
+        complete() {
+          _.remove(dashboard.users, (u) => u === user);
+        },
       })
     );
   }
