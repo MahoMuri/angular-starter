@@ -80,15 +80,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  getUsers() {
+  getUsers(dashboard = this) {
     this.subscriptions.add(
-      this.userService.getUsers().subscribe((users) => {
-        this.users = users;
+      this.userService.getUsers().subscribe({
+        next(users) {
+          dashboard.users = users;
+        },
+        error(err) {
+          dashboard.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to fetch users!',
+          });
+        },
       })
     );
   }
 
-  addUser() {
+  addUser(dashboard = this) {
     const invalidControls = this.hasInvalidControls();
     if (invalidControls.length) {
       this.messageService.add({
@@ -101,16 +110,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
       return;
     }
-
-    this.displayInsertModal = false;
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'User Added!',
-    });
-
-    const test: string = this.insertFormGroup.get('lastName')?.value[0];
-    test.toLowerCase();
 
     this.user = {
       id: new Generator().generate().toString(),
@@ -130,8 +129,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
     };
 
     this.subscriptions.add(
-      this.userService.addUser(this.user).subscribe((user) => {
-        this.users.push(user);
+      this.userService.addUser(this.user).subscribe({
+        next(user) {
+          dashboard.users.push(user);
+        },
+        error(err) {
+          console.error(err);
+          dashboard.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to add user!',
+          });
+        },
+        complete() {
+          dashboard.displayInsertModal = false;
+          dashboard.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'User Added!',
+          });
+        },
       })
     );
 
@@ -163,24 +180,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
     );
   }
 
-  updateUser() {
+  updateUser(dashboard = this) {
     if (this.user) {
       this.subscriptions.add(
-        this.userService.updateUser(this.user).subscribe(() => {
-          this.users[this.users.findIndex((u) => u.id === this.user.id)] =
-            this.user;
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'User Updated!',
-          });
+        this.userService.updateUser(this.user).subscribe({
+          next(val) {
+            console.log(val);
+            dashboard.messageService.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: 'User Updated!',
+            });
+          },
+          error(err) {
+            dashboard.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to delete!',
+            });
+            console.error(err);
+          },
+          complete() {
+            dashboard.users[
+              dashboard.users.findIndex((u) => u.id === dashboard.user.id)
+            ] = dashboard.user;
+          },
         })
       );
       this.displayUpdateModal = false;
     }
   }
 
-  searchUser(id: string, isOp = false) {
+  searchUser(id: string, isOp = false, dashboard = this) {
     if (!id) {
       this.userFound = false;
       this.messageService.add({
@@ -192,20 +223,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     this.subscriptions.add(
-      this.userService.getUser(id).subscribe((res) => {
-        if (!res || res.id !== id) {
-          this.userFound = false;
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'User not found!',
-          });
-          return;
-        }
+      this.userService.getUser(id).subscribe({
+        next(user) {
+          if (!user || user.id !== id) {
+            dashboard.userFound = false;
+            dashboard.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'User not found!',
+            });
+            return;
+          }
 
-        this.userFound = true;
-        this.displayUpdateModal = true;
-        this.user = res;
+          dashboard.userFound = true;
+          dashboard.displayUpdateModal = true;
+          dashboard.user = user;
+        },
       })
     );
 

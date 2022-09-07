@@ -19,44 +19,24 @@ export class UserService {
   constructor(private http: HttpClient) {}
 
   getUsers(): Observable<User[]> {
-    return this.http
-      .get<User[]>(this.baseURL)
-      .pipe(catchError(this.handleError<User[]>('getUsers', [])));
+    return this.http.get<User[]>(this.baseURL);
   }
 
   getUser(id: string): Observable<User> {
     const url = `${this.baseURL}/?id=${id}`;
-    return this.http.get<User[]>(url).pipe(
-      map((users) => users[0]),
-      catchError(this.handleError<User>('getUser'))
-    );
+    return this.http.get<User[]>(url).pipe(map((users) => users[0]));
   }
 
   addUser(user: User): Observable<User> {
-    return this.http
-      .post<User>(this.baseURL, user, this.httpOptions)
-      .pipe(catchError(this.handleError<User>('addUser')));
+    return this.http.post<User>(this.baseURL, user, this.httpOptions);
   }
 
   deleteUser(id: string): Observable<User> {
     const url = `${this.baseURL}/${id}`;
-    return this.http
-      .delete<User>(url, this.httpOptions)
-      .pipe(catchError(this.handleError<User>('deleteUser')));
+    return this.http.delete<User>(url, this.httpOptions);
   }
 
   updateUser(user: User): Observable<any> {
-    return this.http
-      .put(this.baseURL, user, this.httpOptions)
-      .pipe(catchError(this.handleError<User>('updateUser')));
-  }
-
-  private handleError<T>(operation = 'operation', result?: T) {
-    return (error: any): Observable<T> => {
-      console.error(error);
-
-      // console.error(`${operation} failed: ${error}`);
-      return of(result as T);
-    };
+    return this.http.put(this.baseURL, user, this.httpOptions);
   }
 }
