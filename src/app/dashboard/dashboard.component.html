@@ -42,8 +42,8 @@
 
 <!-- Data Table -->
 <div class="p-10">
-    <h1 class="font-semibold mb-10">Welcome, {{ loggedAdminUser | titlecase }}</h1>
-    <p-table [value]="users" styleClass="p-datatable-gridlines">
+    <h1 class="font-semibold mb-10">Welcome, {{ loggedAdminUser }}</h1>
+    <p-table [value]="users" responsiveLayout="stack" styleClass="p-datatable-gridlines">
         <ng-template pTemplate="header">
             <tr>
                 <th></th>

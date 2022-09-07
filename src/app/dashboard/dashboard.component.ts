@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
@@ -11,10 +12,12 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
+import _ from 'lodash';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { MessageService } from 'primeng/api';
 import { OverlayPanel } from 'primeng/overlaypanel';
+import { Subscription } from 'rxjs';
 import { Generator } from 'snowflake-generator';
 import { DataSource, User } from 'src/interfaces/User';
 import { UserService } from '../user.service';
@@ -25,7 +28,7 @@ import { UserService } from '../user.service';
   styleUrls: ['./dashboard.component.css'],
   providers: [MessageService],
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   displayInsertModal!: boolean;
   displayUpdateModal!: boolean;
   displayCVModal!: boolean;
@@ -43,6 +46,7 @@ export class DashboardComponent implements OnInit {
   ];
   dataSource!: DataSource;
   loggedAdminUser!: string;
+  subscriptions = new Subscription();
 
   // Form related Variables
   insertFormGroup!: FormGroup;
@@ -63,24 +67,37 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (!this.cookieService.check('loggedAdminUser')) {
-      this.router.navigateByUrl('/login');
-      return;
-    }
     this.createValidators();
     this.createFormGroup();
     this.getUsers();
 
-    this.loggedAdminUser = this.cookieService.get('loggedAdminUser');
+    this.loggedAdminUser = _.startCase(
+      this.cookieService.get('loggedAdminUser')
+    );
   }
 
-  getUsers() {
-    this.userService.getUsers().subscribe((users) => {
-      this.users = users;
-    });
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
-  addUser() {
+  getUsers(dashboard = this) {
+    this.subscriptions.add(
+      this.userService.getUsers().subscribe({
+        next(users) {
+          dashboard.users = users;
+        },
+        error(err) {
+          dashboard.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to fetch users!',
+          });
+        },
+      })
+    );
+  }
+
+  addUser(dashboard = this) {
     const invalidControls = this.hasInvalidControls();
     if (invalidControls.length) {
       this.messageService.add({
@@ -94,14 +111,12 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.displayInsertModal = false;
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'User Added!',
-    });
     this.user = {
       id: new Generator().generate().toString(),
+      username: `${_.camelCase(
+        `${this.firstName.value}${this.lastName.value}`
+      )}`,
+      password: 'password123',
       firstName: this.insertFormGroup.get('firstName')?.value,
       lastName: this.insertFormGroup.get('lastName')?.value,
       country: this.insertFormGroup.get('country')?.value,
@@ -113,40 +128,90 @@ export class DashboardComponent implements OnInit {
       dataSource: this.dataSource,
     };
 
-    this.userService.addUser(this.user).subscribe((user) => {
-      this.users.push(user);
-    });
+    this.subscriptions.add(
+      this.userService.addUser(this.user).subscribe({
+        next(user) {
+          dashboard.users.push(user);
+        },
+        error(err) {
+          console.error(err);
+          dashboard.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to add user!',
+          });
+        },
+        complete() {
+          dashboard.displayInsertModal = false;
+          dashboard.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'User Added!',
+          });
+        },
+      })
+    );
 
     this.resetForm();
   }
 
-  deleteUser(user: User) {
-    this.users = this.users.filter((u) => u !== user);
-    this.userService.deleteUser(user.id).subscribe(() => {
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'User Deleted!',
-      });
-    });
+  deleteUser(user: User, dashboard = this) {
+    this.subscriptions.add(
+      this.userService.deleteUser(user.id).subscribe({
+        next() {
+          dashboard.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'User Deleted!',
+          });
+        },
+        error(err) {
+          dashboard.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to delete!',
+          });
+          console.error(err);
+        },
+        complete() {
+          _.remove(dashboard.users, (u) => u === user);
+        },
+      })
+    );
   }
 
-  updateUser() {
+  updateUser(dashboard = this) {
     if (this.user) {
-      this.userService.updateUser(this.user).subscribe(() => {
-        const index = this.users.findIndex((u) => u.id === this.user.id);
-        this.users[index] = this.user;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'User Updated!',
-        });
-      });
+      this.subscriptions.add(
+        this.userService.updateUser(this.user).subscribe({
+          next(val) {
+            console.log(val);
+            dashboard.messageService.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: 'User Updated!',
+            });
+          },
+          error(err) {
+            dashboard.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to delete!',
+            });
+            console.error(err);
+          },
+          complete() {
+            dashboard.users[
+              dashboard.users.findIndex((u) => u.id === dashboard.user.id)
+            ] = dashboard.user;
+          },
+        })
+      );
       this.displayUpdateModal = false;
     }
   }
 
-  searchUser(id: string, isOp = false) {
+  searchUser(id: string, isOp = false, dashboard = this) {
     if (!id) {
       this.userFound = false;
       this.messageService.add({
@@ -157,21 +222,25 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.userService.getUser(id).subscribe((res) => {
-      if (!res || res.id !== id) {
-        this.userFound = false;
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'User not found!',
-        });
-        return;
-      }
+    this.subscriptions.add(
+      this.userService.getUser(id).subscribe({
+        next(user) {
+          if (!user || user.id !== id) {
+            dashboard.userFound = false;
+            dashboard.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'User not found!',
+            });
+            return;
+          }
 
-      this.userFound = true;
-      this.displayUpdateModal = true;
-      this.user = res;
-    });
+          dashboard.userFound = true;
+          dashboard.displayUpdateModal = true;
+          dashboard.user = user;
+        },
+      })
+    );
 
     if (isOp) {
       this.overlayPanel.hide();

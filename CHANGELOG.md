@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.2](https://github.com/MahoMuri/angular-starter/compare/v1.1.0...v1.1.2) (2022-09-07)
+
+### [1.0.2](https://github.com/MahoMuri/angular-starter/compare/v1.0.1...v1.0.2) (2022-09-04)
+
+
+### Bug Fixes
+
+* Fixed userID no resetting after submission [#3](https://github.com/MahoMuri/angular-starter/issues/3) ([bcfa24a](https://github.com/MahoMuri/angular-starter/commit/bcfa24a4385e23c1103a1527345a976983a42f53))
+
+### [1.1.1](https://github.com/MahoMuri/angular-starter/compare/v1.1.0...v1.1.1) (2022-09-06)
+
+
+### Bug Fixes
+
+* Added router guards ([f8cf316](https://github.com/MahoMuri/angular-starter/commit/f8cf31681724ed6b488dc9d3e86ea257342c9329))
+* Forgot to remove cookie service check ([c64ef18](https://github.com/MahoMuri/angular-starter/commit/c64ef1866a2a25690665ddf274a9998d7e865fab))
+
+### [1.0.2](https://github.com/MahoMuri/angular-starter/compare/v1.0.1...v1.0.2) (2022-09-04)
+
+
+### Bug Fixes
+
+* Fixed userID no resetting after submission [#3](https://github.com/MahoMuri/angular-starter/issues/3) ([bcfa24a](https://github.com/MahoMuri/angular-starter/commit/bcfa24a4385e23c1103a1527345a976983a42f53))
+
 ## [1.1.0](https://github.com/MahoMuri/angular-starter/compare/v1.0.1...v1.1.0) (2022-09-04)
 
 
